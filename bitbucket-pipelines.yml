@@ -1,0 +1,29 @@
+#  Template NodeJS build
+
+#  This template allows you to validate your NodeJS code.
+#  The workflow allows running tests and code linting on the default branch.
+
+image: node:12.4.0
+
+pipelines:
+  default:
+    - step:
+        name: Code linting
+        script:
+          - npm install eslint babel-eslint eslint-config-google
+          - npx eslint .
+        caches:
+          - node
+  pull-requests:
+    "**":
+      - step:
+          name: Build and Test
+          caches:
+            - node
+          script:
+            - npm install
+            - npm run coverage
+            - pipe: atlassian/slack-notify:1.0.0
+              variables:
+                WEBHOOK_URL: $WEBHOOK_URL
+                MESSAGE: "Pull request build"
